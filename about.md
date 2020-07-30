@@ -19,5 +19,9 @@ An original creation because nothing else in PHP-land existed. When you try and 
 ## 🌍[PHPCoord](https://github.com/dvdoug/PHPCoord) [![Download count](https://img.shields.io/packagist/dt/php-coord/php-coord.svg)](https://packagist.org/packages/php-coord/php-coord)
 If you have a latitude/longitude from GPS and just want to plot it on Google Maps or OpenStreetMap you probably don't need this. But if you have grid co-ordinates from a national mapping system e.g. the UK's Ordnance Survey and need to convert them, or have recently had your mind blown by discovering that the GPS latitude/longitude of a spot does not always agree with what national mapping authorities think it is then you need a conversion library. This project already existed when I first needed to do co-ordinate conversion, but was written for PHP4. I've since polished it up, fixed some bugs and added some features.
 
-## 📈[Behat-Code-Coverage](https://github.com/dvdoug/behat-code-coverage) [![Download count](https://img.shields.io/packagist/dt/dvdoug/behat-code-coverage.svg)](https://packagist.org/packages/dvdoug/behat-code-coverage)
+## 📈[behat-code-coverage](https://github.com/dvdoug/behat-code-coverage) [![Download count](https://img.shields.io/packagist/dt/dvdoug/behat-code-coverage.svg)](https://packagist.org/packages/dvdoug/behat-code-coverage)
 My most recent pick-up, this is actually a fork of an abandoned fork of an abandoned project making me something of a 3rd-generation maintainer. The library allows you to generate code coverage reports when running a Behat test suite, just like those you can get when running PHPUnit.
+
+## 📈[php-code-coverage](https://github.com/sebastianbergmann/php-code-coverage)
+I've also done some work on enhancing the code coverage statistics reported by PHPUnit's code coverage component as
+this is what's wrapped by behat-code-coverage. You can read about those changes [here](https://doug.codes/php-code-coverage).

@@ -1,0 +1,479 @@
+---
+layout: post
+title: "Enhancements to PHP code coverage in 2020"
+subtitle: "Did you realise your coverage numbers are untruths?"
+background: '/img/bg-php.jpg'
+permalink: /php-code-coverage
+---
+
+<p class="lead">
+    In 2003, with the release of <a href="https://xdebug.org/">Xdebug</a> 1.2, Derick Rethans introduced the ability to
+    collect code coverage data to the PHP ecosystem for the first time. In 2004, with the release of
+    <a href="https://phpunit.de/">PHPUnit</a> 2, Sebastian Bergmann made the first real use of this new power by allowing
+    developers to evaluate the effectiveness of their test suites by generating coverage reports.
+</p>
+
+<p>
+    Since then, <a href="https://github.com/sebastianbergmann/php-code-coverage">php-code-coverage</a> has been spun
+    out from PHPUnit into a reusable standalone component, and PHPDBG and
+    <a href="https://github.com/krakjoe/pcov">PCOV</a> have been created as alternative coverage drivers. Fundamentally
+    however, nothing has changed for developers about the basic process in the past 16 years.
+</p>
+
+<p>
+    In August 2020 with the release of php-code-coverage 9.0 and the linked releases of PHPUnit 9.3 and
+    <a href="https://github.com/dvdoug/behat-code-coverage">behat-code-coverage</a> 5.0 a new way of looking at coverage
+    will become available.
+</p>
+
+
+<nav>
+    <h2 class="section-heading">Contents</h2>
+    <ol>
+        <li><a href="#recap">A quick recap of the basics</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+        <li><a href="#alternative">Alternative metrics</a></li>
+        <li><a href="#branch-coverage">Branch coverage</a></li>
+        <li><a href="#path-coverage">Path coverage</a></li>
+        <li><a href="#enabling">Enabling the new metrics</a></li>
+        <li><a href="#which">Which metric should I use?</a></li>
+        <li><a href="#disadvantages">Are there reasons not to enable the new metrics?</a></li>
+        <li><a href="#summary">Summary</a></li>
+    </ol>
+</nav>
+
+<h2 class="section-heading" id="recap">A quick recap of the basics</h2>
+
+<p>
+    Most PHP developers will be familiar with the concept of writing automated tests for your code.
+    Closely linked to that concept, is that of <dfn>code coverage</dfn>, which is the idea of measuring the percentage
+    of your code that is executed or "covered" by the test suite. For example, if we had the following code:
+</p>
+
+{% highlight php linenos %}
+<?php
+class PercentCalculator
+{
+    public function __construct(int $numerator, int $denominator)
+    {
+        $this->numerator = $numerator;
+        $this->denominator = $denominator;
+    }
+
+    public function calculatePercent(): float
+    {
+        return round($this->numerator / $this->denominator * 100, 1);
+    }
+}
+
+{% endhighlight %}
+
+<p>We could write a PHPUnit test as follows:</p>
+
+{% highlight php linenos %}
+<?php
+class PercentCalculatorTest extends PHPUnit\Framework\TestCase
+{
+    public function testTwentyIntoForty(): void
+    {
+        $calculator = new PercentCalculator(20, 40);
+        self::assertEquals(50.0, $calculator->calculatePercent());
+    }
+}
+{% endhighlight %}
+
+<p>Running that through PHPUnit confirms that in this trivial example, we have achieved 100% coverage.</p>
+<iframe src="assets/coverage-blog/PercentCalculator1.php.html"></iframe>
+
+
+
+<h2 class="section-heading" id="limitations">Limitations</h2>
+<p>
+    In that example code however, there was actually a small potential bug. If <code>$denominator</code> is <var>0</var>
+    then we'll get a divide by zero error. Let's patch that and see what happens.
+</p>
+
+{% highlight php linenos %}
+<?php
+class PercentCalculator
+{
+    public function __construct(int $numerator, int $denominator)
+    {
+        $this->numerator = $numerator;
+        $this->denominator = $denominator;
+    }
+
+    public function calculatePercent(): float
+    {
+        //I could have sanity checked the value instead, but this specific fix is important for the point I want to make
+        return $this->denominator ? round($this->numerator / $this->denominator * 100, 1) : 0.0;
+    }
+}
+{% endhighlight %}
+
+<iframe src="assets/coverage-blog/PercentCalculator2.php.html"></iframe>
+
+<p>
+    Even though line 12 now has a ternary <code>if/else</code> in it, and even though we haven't written a test to
+    check if our handling of <var>0</var> is correct the report is telling us we still have 100% code coverage.
+</p>
+
+<p>
+    <strong>Because <em>part</em> of the line is covered by a test, <em>all</em> of the line is marked as covered.</strong>
+    This can be very misleading!
+</p>
+
+<p>
+    Other code constructs can often exhibit the same problems when simply counting whether a line was executed or not,
+    for example:
+</p>
+
+{% highlight php linenos %}
+if ($a || $b || $c) {    // testing just *one* of these
+    doSomething();       // possibilities will count as 100% coverage
+}
+{% endhighlight %}
+
+{% highlight php linenos %}
+public function pluralise(string $thing, int $count): string
+{
+    $string = $count . ' ' . $thing;
+
+    if ($count > 1) {     // if you only test $count >= 2, you'll still get 100% coverage
+        $string .= 's';   // because there are no dedicated source code lines for $count === 1
+    }                     // that can be marked as uncovered
+
+    return $string;
+}
+{% endhighlight %}
+
+<h2 class="section-heading" id="alternative">Alternative metrics</h2>
+<p>
+    Xdebug since version 2.3 has actually had the ability to collect not just the line-based metrics that we all
+    know, but also the alternative metrics of branch and path coverage. Introducing the feature, Derick's blog post
+    ended with this infamous statement:
+</p>
+
+<blockquote class="blockquote">
+    <p class="mb-0">
+        Now it's just waiting until Sebastian (or somebody else) has time to upgrade PHP_CodeCoverage to show the branch and path coverage. Happy hacking!
+    </p>
+    <footer class="blockquote-footer"><cite>Derick Rethans, January 2015</cite></footer>
+</blockquote>
+
+<p>
+    After waiting 5 years for this mysterious "somebody else"👀 to show up, I decided to give implementing it a
+    go myself.
+</p>
+
+<p>
+    Many thanks to Sebastian Bergmann for accepting my pull requests.
+</p>
+
+
+<h2 class="section-heading" id="branch-coverage">Branch coverage</h2>
+<p>
+    In all but the simplest code, there are places where the execution path can diverge in 2 (or more ways). These occur
+    at every decision point, for example at every <code>if</code>/<code>else</code> or <code>while</code>.
+    Each "side" of those divergence points is its own <dfn>branch</dfn>. Where there is no decision point, then the
+    execution flow has just a single branch.
+</p>
+
+<p>
+    N.B. Although the same tree-based metaphor is used, a branch in this context is <em>not</em> the same thing as a
+    branch in a version control system, don't get them confused!
+</p>
+
+<p>
+    When branch and path coverage is enabled, the generated HTML report from php-code-coverage now includes additional
+    views to show the branch coverage and the path coverage alongside the traditional line coverage report.
+    Here's what the branch view looks like using same example code as before:
+</p>
+
+<iframe src="assets/coverage-blog/PercentCalculator3.php.html"></iframe>
+
+<p>
+    As you can see, the summary box at the top of the page indicates immediately that although we have 100% coverage
+    on the line-based metric, that we don't on either the branch or path basis (paths are detailed in the next section).
+</p>
+
+<p>
+    Additionally, line 12 is highlighted in warning yellow to indicate that coverage for that particular line is
+    incomplete (a line with 0% coverage would show in red, consistent with the traditional view).
+</p>
+
+<p>
+    Finally, the more eagle-eyed may have noticed that additional lines are colour-coded compared to the line-based
+    coverage view. This is because branches are based on the execution flow inside the PHP interpreter, and the first
+    branch of each function is considered to start at function entry. This is different from line-based coverage where
+    only the function body is considered to contain executable lines, the function declaration itself is considered
+    non-executable.
+</p>
+
+<h3>Identifying branches</h3>
+<p>
+    Such differences between what the PHP interpreter considers to be a logically distinct branch of code, and the
+    mental model of a developer can make understanding the numbers tricky. For example if you asked me how many branches
+    <code>calculatePercent()</code> had, I would say the answer is 2 (the special case for <var>0</var> and
+    the general case). However, looking at the report from php-code-coverage above, this 1 line function actually has…4‽
+</p>
+
+<p>
+    To help developer understanding of what a branch is, and also to help identify more clearly branches that are hidden
+    from source code, the branch report also has a secondary view. This can be found
+    underneath the main one, and shows an exploded view of each individual branch. It looks like this:
+</p>
+
+<iframe src="assets/coverage-blog/PercentCalculator4.php.html"></iframe>
+
+<p>
+    It's still not <em>completely</em> obvious, but from that it is now possible to understand what the branches in
+    <code>calculatePercent()</code> actually are:
+</p>
+<ul>
+    <li>Branch 1 starts at function entry and includes the evaluation of <code>$this->denominator</code></li>
+    <li>Execution then diverges into branches 2 and 3 depending on whether the special case is hit or not</li>
+    <li>Branch 4 is where branches 2/3 recombine and consists of the <code>return</code> and function exit</li>
+</ul>
+
+<p>
+    Mentally mapping branches back to individual pieces of source code is a new skill that takes a little bit of
+    practice, but it's definitely easier to perform on code that is easy to read and understand in the first place.
+    If your code is full of "clever" 1-liners where multiple pieces of logic combine like this one, then expect more
+    difficulty compared to code that prefers to structure things over multiple lines where the line/branch relationship
+    is more likely to be 1-1. Written in a different style, the same logic would look this instead:
+</p>
+
+<iframe src="assets/coverage-blog/PercentCalculator5.php.html"></iframe>
+
+<h3>Clover</h3>
+<p>
+    If you're using php-code-coverage's Clover report to export coverage data to another system, this now also benefits
+    from having branch coverage enabled by now being able to export data under the
+    <code>conditionals</code> and <code>coveredconditionals</code> keys. Previously (or with branch coverage disabled),
+    these values are hard-coded to 0 in the export.
+</p>
+
+<h2 class="section-heading" id="path-coverage">Path coverage</h2>
+<p>
+    <dfn>Paths</dfn> are the possible combinations of branches. In the case of the <code>calculatePercent()</code>
+    example, there are 2 possible paths as outlined above:
+</p>
+<ul>
+    <li>Branch 1, followed by branch 2 and then branch 4</li>
+    <li>Branch 1, followed by branch 3 and then branch 4</li>
+</ul>
+
+<iframe src="assets/coverage-blog/PercentCalculator6.php.html"></iframe>
+
+<p>
+    Often however, the number of paths is more than than the number of branches for example in code that has many
+    conditionals and loops. The following example taken from php-code-coverage has 23 branches, but
+    there are actually <em>65</em> different combinations of execution path that can be taken through the function:
+</p>
+
+{% highlight php linenos %}
+final class File extends AbstractNode
+{
+    public function numberOfTestedMethods(): int
+    {
+        if ($this->numTestedMethods === null) {
+            $this->numTestedMethods = 0;
+
+            foreach ($this->classes as $class) {
+                foreach ($class['methods'] as $method) {
+                    if ($method['executableLines'] > 0 &&
+                        $method['coverage'] === 100) {
+                        $this->numTestedMethods++;
+                    }
+                }
+            }
+
+            foreach ($this->traits as $trait) {
+                foreach ($trait['methods'] as $method) {
+                    if ($method['executableLines'] > 0 &&
+                        $method['coverage'] === 100) {
+                        $this->numTestedMethods++;
+                    }
+                }
+            }
+        }
+
+        return $this->numTestedMethods;
+    }
+}
+{% endhighlight %}
+<span class="caption text-muted">
+    If you're struggling to find all 23 branches, don't forget that each <code>foreach</code> might receive an empty
+    iterator, and each <code>if</code> has an invisible <code>else</code>
+</span>
+
+<p>
+    Yes, that would mean 65 testcases to get 100% path coverage.
+</p>
+
+<p>
+    The HTML report from php-code-coverage also includes a secondary per-path view in the same style as for branches
+    that shows which ones are covered by a test and which aren't.
+</p>
+
+
+<h3>CRAP</h3>
+
+<p>
+    Enabling path coverage also has 1 other effect on the displayed metrics and that is on the reported
+    <dfn title="Change Risk Anti Pattern">CRAP</dfn> score. The definition promulgated by
+    <a href="http://www.crap4j.org/faq.html">crap4j.org</a> uses percentage path coverage as an input into the
+    calculation which historically has not been an option for PHP which has used percentage line coverage as
+    a substitute. The effect of the change is that for small functions with good coverage, your reported CRAP score is
+    likely to stay the same or even decrease. Functions with many paths and poor coverage will start to see much larger
+    numbers.
+</p>
+
+
+<h2 class="section-heading" id="enabling">Enabling the new metrics</h2>
+<p>
+    Branch and path coverage are enabled or disabled together as they are just different views into the
+    same underlying execution data.
+</p>
+<h3>PHPUnit</h3>
+<p>
+    For PHPUnit 9.3+, the additional metrics are disabled by default and can be enabled either via the CLI or via the
+    <kbd>phpunit.xml</kbd> configuration file <em>but only when running under Xdebug</em>. Attempting to enable the
+    feature when using either PCOV or PHPDBG will result in a warning about incompatible configuration and no coverage
+    will be collected.
+</p>
+
+<p>
+    From the CLI, use the <code>--path-coverage</code> option: <kbd>vendor/bin/phpunit --path-coverage</kbd>.
+</p>
+
+<p>
+    For <kbd>phpunit.xml</kbd>, set the <code>pathCoverage</code> attribute to <code>true</code> on the
+    <code>coverage</code> element.
+</p>
+
+{% highlight xml linenos %}
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+    <testsuites>
+        <testsuite name="default">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage pathCoverage="true" processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+
+        <report>
+            <text outputFile="php://stdout"/>
+            <html outputDirectory="build/coverage"/>
+        </report>
+
+    </coverage>
+</phpunit>
+{% endhighlight %}
+<span class="caption text-muted">
+    PHPUnit 9.3 also introduces
+    <a href="https://github.com/sebastianbergmann/phpunit/blob/master/ChangeLog-9.3.md#configuration-of-code-coverage-and-logging-in-phpunitxml">major changes</a>
+    to the format of its configuration file so the structure in the above example probably looks different to what you're used to seeing
+</span>
+
+<h3>behat-code-coverage</h3>
+<p>
+    For behat-code-coverage 5.0+, configuration will be via <kbd>behat.yml</kbd>. It will warn, but still generate
+    coverage if you try and enable it when using a driver other than Xdebug to make it easier to use the same
+    configuration file in disparate environments.
+</p>
+
+<h2 class="section-heading" id="which">Which metric should I use?</h2>
+<p>
+    Speaking personally, I will be using the new metrics wherever possible, and having tested them against a few
+    different codebases to figure out what "normal" looks like, I think I'm likely to settle on the hybrid approach
+    outlined below for my own projects. For professional corporate work, whether to switch metrics is obviously a team
+    discussion and I look forward with interest to find out if wider consensus is in alignment with my own thinking or
+    if it goes in a different direction.
+</p>
+
+<h3>My opinion</h3>
+
+<p>
+    100% path coverage is undoubtedly the holy grail, and where <em>reasonably</em> possible I think it's a good metric
+    to aim at even if you don't hit it - if you're writing tests, you should be thinking about things like edge cases
+    anyway and path coverage helps show whether you got them all.
+</p>
+
+<p>
+    However, where a method has tens, hundreds or even thousands of paths which is actually not uncommon for
+    reasonably complex things, then I won't be spending the time to write the hundreds of tests necessary to achieve that.
+    Reasonably, for me, stops at the single digits. Testing is not an intrinsic good, but is a risk
+    mitigation tool and an investment in the future. Tests should have a positive return on investment, and spending
+    time writing <em>that many</em> tests is rarely likely to pay off. In those situations, I am likely to aim for good
+    branch coverage instead as that will at least ensure that I've thought what happens at each decision point.
+</p>
+
+<p>
+    What I will do in cases of high path numbers (identified by now accurate CRAP scores), is evaluate whether the code in
+    in question is doing too many things and whether there exists a sensible way to split it into smaller functions
+    that can be reasoned about more carefully. Sometimes there won't, and that's OK - we don't have to fix every single
+    project risk. Just knowing about them is also a win. It's also important to remember that function boundaries and
+    unit testing of them individually does represent an artificial split of logic and doesn't represent the true complexity of
+    your software on an end to end basis. I would therefore encourage <em>not</em> to split large functions up if you're
+    doing it purely because of scary path numbers. Do it only where the split reduces cognitive load and aids
+    human comprehension.
+</p>
+
+<h2 class="section-heading" id="disadvantages">Are there reasons not to enable the new metrics?</h2>
+<p>
+    Yes, performance😔. It's not a secret that running code under Xdebug makes it perform <em>incredibly</em> slowly
+    compared to PHP's baseline performance, and enabling branch and path coverage makes it worse due to the additional
+    overhead of all of the additional execution data it now needs to keep track of internally.
+</p>
+
+<p>
+    The good news is that the necessity to mitigate performance issues inspired general performance improvements inside
+    php-code-coverage that will benefit anyone using Xdebug. Performance of testsuites varies dramatically so it's
+    hard to try and extrapolate a rule of thumb, but generating line-based coverage should now be quicker on every
+    codebase.
+</p>
+
+<p>
+    Generating branch and path based coverage is still approximately 3𝑥-5𝑥 slower though so do take that into account.
+    You may wish to consider enabling it selectively, perhaps only when running individual test files rather than the
+    entire test suite, or on a nightly "enhanced coverage" build rather than every push to CI.
+</p>
+
+<p>
+    Xdebug 3 will be significantly faster than current versions due to work being done on
+    modularisation and performance so these caveats should be treated as only applying to Xdebug 2.𝑥. With v3, even with
+    the additional overhead to collect the extra data, it should be possible to generate branch and path coverage in
+    less time than it takes to get just line coverage today!🤞
+</p>
+
+<div class="text-center">
+    <a href="https://twitter.com/derickr/status/1288107558272561153">
+        <img src="https://pbs.twimg.com/media/EeBjZjDWoAA199_?format=png&name=orig">
+        <span class="caption text-muted">
+            Benchmark by Sebastian Bergmann, graph by Derick Rethans
+        </span>
+    </a>
+</div>
+
+
+<h2 class="section-heading" id="summary">Summary</h2>
+<p>
+    Please do test out the new capabilities and send feedback on whether you think they're useful. In particular ideas
+    for alternative visualisations (perhaps borrowed from other languages) would be very interesting to see.
+</p>
+
+<p>
+    I am also looking forward with interest to all the debates about what an appropriate level of coverage even is😉
+</p>
+
+<span class="caption text-muted">
+    Header image by <a href="https://www.flickr.com/photos/drewm/3192714526/">Drew McLellan</a>, gratefully reused under
+    <a href="https://creativecommons.org/licenses/by-nc/2.0/">CC BY-NC</a>
+</span>
