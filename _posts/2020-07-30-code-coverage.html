@@ -384,9 +384,10 @@ final class File extends AbstractNode
 
 <h3>behat-code-coverage</h3>
 <p>
-    For behat-code-coverage 5.0+, configuration will be via <kbd>behat.yml</kbd>. It will warn, but still generate
-    coverage if you try and enable it when using a driver other than Xdebug to make it easier to use the same
-    configuration file in disparate environments.
+    For behat-code-coverage 5.0+, configuration is via <kbd>behat.yml</kbd> using the
+    <code>branchAndPathCoverage</code> attribute. It will warn, but still generate coverage if you try and enable it
+    when using a driver other than Xdebug to make it easier to use the same configuration file in disparate environments.
+    When not configured explicitly, it will be enabled by default when running under Xdebug.
 </p>
 
 <h2 class="section-heading" id="which">Which metric should I use?</h2>
