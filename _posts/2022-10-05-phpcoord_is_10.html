@@ -1,0 +1,471 @@
+---
+layout: post
+title: "PHPCoord is 10! (ish)"
+subtitle: "Documenting the project history"
+background: '/img/bg-map.jpg'
+permalink: /phpcoord-is-10
+---
+
+<p class="lead">
+    Ten years ago, in October 2012, I made the first commit to the <i>PHPCoord</i> open source project on GitHub. This is a
+    reconstructed record of the project's origins and subsequent development.
+</p>
+
+<nav>
+    <h2 class="section-heading">Contents</h2>
+    <ol>
+        <li><a href="#origins">Origins of the project</a></li>
+        <li><a href="#PHPcoord">PHPcoord</a></li>
+        <li><a href="#initialfork">The initial fork</a></li>
+        <li><a href="#version2">Version 2</a></li>
+        <li><a href="#version3">Version 3</a></li>
+        <li><a href="#contemplation">Contemplation</a></li>
+        <li><a href="#therewrite">The rewrite</a></li>
+    </ol>
+</nav>
+
+<h2 class="section-heading" id="origins">Origins of the project</h2>
+
+<p>
+    I used to work for an educational non-profit that was focused on the area of nurseries and pre-schools. The
+    organisation ran about 100 of these directly, and provided advice and support to approx 13,000 others. As part
+    of my role in looking after the technical side of the organisation's website, in early 2008 I built a
+    “find my nearest childcare” tool (now offline) that could be used by parents of young children. Although
+    “find my nearest” tools were relatively common even back then, I did learn that my particular use case had some
+    complexities that didn't necessarily apply to the implementations that were described in the blog posts I was
+    then reading explaining how to build one:
+</p>
+
+<ul>
+    <li>
+        The number of venues I was working with was ≈13,000. For comparison, the national retailer “B&Q” has about 300.
+        This meant an order of magnitude more calculations were necessary on every search than a typical implementation.
+    </li>
+    <li>
+        With a retailer, a website team has the possibility of having precise location coordinate data be
+        stored centrally as mandated data before a new store can be added to the website. With a primarily membership
+        organisation like I was working for, I could hardly demand that each new member signing up be forced to supply
+        their building's latitude and longitude. I therefore had to develop a solution for determining this data from
+        their postal address.
+    </li>
+    <li>
+        My budget for the project was precisely zero. The entire website ran on a single £59.99/mo dedicated server,
+        spending money purchasing location data for a non-core feature was absolutely out of the question.
+    </li>
+</ul>
+
+<p>
+    The second and third of those problems was solved by scraping Multimap (now Bing Maps) for each new postcode that
+    the search service hadn't seen before (a daily cron for new venues, realtime for search postcodes). These were then
+    stored in a database, and an optimised conversion of the haversine formula into SQL<sup><a href="#fn1" id="f1">1</a></sup>
+    <sup><a href="#fn2" id="f2">2</a></sup> <sup><a href="#fn3" id="f3">3</a></sup> was used to determine the relevant results.
+</p>
+
+<p>
+    In April 2010, Ordnance Survey started to make available <i>Code-Point Open</i>, which is a free dataset that maps
+    the centre of every postcode in Great Britain to its easting and northing. Making use of this meant there would be no need
+    to abuse Multimap to get the coordinate data anymore, however it did mean that I had to find a method of converting
+    eastings and northings into latitudes and longitudes so that the distance calculations would continue to work
+    <sup><a href="#fn4" id="f4">4</a></sup>.
+</p>
+
+<h2 class="section-heading" id="PHPcoord">PHPcoord</h2>
+
+<p>
+    After some research, I found <a href="https://web.archive.org/web/20100209004025/http://www.jstott.me.uk/phpcoord/"><i>PHPcoord</i></a>
+    (lowercase c) by Jonathan Stott. It wasn't ideal in terms of code quality (Jonathan seems to have been an
+    academic rather than a professional developer), for instance it had a single large file rather than the conventional
+    1 class per file that PHP developers use, and was also written for PHP4 and the PHP4 object model rather than the
+    newer, different PHP5 object model.
+</p>
+
+<p>
+    However those issues weren't showstoppers (PHP4 code did generally run successfully under PHP5) and testing showed
+    the code seemed to do the job quite well and so I imported it into <code>lib/</code><sup><a href="#fn6" id="f6">6</a></sup>,
+    hooked it up to my Code-Point Open import script and easily generated the latitude and longitude for every postcode in
+    Great Britain.
+</p>
+
+<p>
+    For the next couple of years, everything went well. Periodically I updated <i>Code-Point Open</i> to populate the database
+    with any newly created postcodes, and <i>PHPcoord</i> continued to calculate the appropriate latitude and longitudes for
+    them.
+</p>
+
+<p>
+    However, it was becoming increasingly clear that <i>PHPcoord</i> was an abandoned library (the author's website had
+    been hacked for years just displaying spam) and therefore the code was never going to be updated for modern PHP.
+</p>
+
+<h2 class="section-heading" id="initialfork">The initial fork</h2>
+
+<p>
+    I therefore decided to fork it, modernise it, and to make the new version publicly available for others to use in
+    much the same way that I had been able to benefit myself from the original work.
+</p>
+
+<p>
+    It's often said that one of the hardest problems in computing is naming things, and the first problem I had was
+    what to call the fork. I decided that since this wasn't an original work, it would be morally dishonest to give the
+    codebase a completely different name, however I did choose to change the capitalisation (to <i>PHPCoord</i>) since the
+    original was always weird to me. For similar reasons, I chose to use <code>php-coord/php-coord</code> as the package
+    name for Packagist because I felt that using my own name for the vendor portion would not really be honest.
+</p>
+
+<p>
+    The choice of Kebab case rather than using the much simpler <code>phpcoord/phpcoord</code> is a decision that
+    continues to haunt me to this day though, because I consistently forget the hyphens when I type it out. Lesson
+    learnt.
+</p>
+
+<p>
+    For a version number, I opted against continuing the numbering sequence of <i>PHPcoord</i>, just in case the original
+    author ever did come back and release something new. I decided that with the new name, this was a new project and
+    thus the first release was <code>v1.0</code>.
+</p>
+
+<p>
+    This <code>v1.0</code> release of the fork was mostly intended to be cosmetic in nature (compliance with PSR standards),
+    and was explicitly designed to be a drop-in replacement for any code using the original project. As it was being
+    published with my name attached however, it was also personally important to me to ensure a fairly high level of quality,
+    and as such I also added the first unit tests, and made usage of a CI system (Travis CI) to ensure that these would
+    be automatically run on every commit and against a variety of PHP versions so that I could make claims about the
+    supported versions of PHP with good confidence.
+</p>
+
+<p>
+    Pleasingly, one the tests I wrote found what appeared to be a rounding issue from the original code which I was able
+    to fix. As part of cross-checking what the expected behaviour should actually be though before changing it, I came
+    across some worked conversion examples from Ordnance Survey. Those revealed that one of the conversion parameters
+    in the code was also slightly wrong (appeared to be a typo), which I was also able to fix. Furthermore, the Ordnance
+    Survey documentation explained that the conversion in question was only approximate and thus revealed the <i>PHPcoord</i>
+    code was making the classic mistake of confusing the number of decimal places in the output of a calculation with
+    its accuracy. That was corrected too, but rounding off to a suitable number of decimal places.
+</p>
+
+<p>
+    I did add one new feature to that initial release, which was an expanded set of geographical knowledge. The original
+    <i>PHPcoord</i> only knew about (and could only convert between), the global WGS84 (GPS) coordinate system and the
+    OSGB36 (British) system. Forked <i>PHPCoord</i> also knew about ED50 and NAD27, the appropriate conversion values
+    to/from WGS84 for them being taken from a page on Wikipedia.
+</p>
+
+<p>
+    That initial <code>v1.0</code> was released in February 2013, with an additional minor release
+    each year for following three years (not an intentional release pattern, that's just how it worked out).
+
+<p>
+    These did additional cleanup, added additional guard checks to the code to avoid potential errors that could be made from
+    consuming applications and fixed a different inaccurate value I found in a formula. These also included a fix
+    for the first reported bug, which had some mixed feelings for me, namely “I had a bug. It's public :(” but also
+    “Yay, people are using my code!”. Luckily for my self-confidence the first few reported bugs all turned out to be
+    issues in the original code, rather than from my changes. Of course other bugs, reported later did turn out to be mine.
+</p>
+
+<h2 class="section-heading" id="version2">Version 2</h2>
+<p>
+    With version 2, I did a much larger refactoring of the code, taking advantage of the need to not need to
+    keep backwards compatibility. This was the first step towards having something resembling a domain model,
+    although with hindsight it had some flaws, in particular confusing the concepts of a datum and ellipsoid.
+</p>
+
+<p>
+    I also received a feature request for, and added support for, the Irish grid systems to complement the existing support
+    for the British grid and also added support for 3D coordinates (those including height) because the conversion formula
+    was inherently 3D but just assuming 0 for height so adding the (optional) ability to supply an actual height was
+    both easy and made sense to do.
+</p>
+
+<p>
+    <code>v2.0</code> was released in January 2016, with <code>v2.1</code> following in September that year to add a new
+    type of distance calculation.
+</p>
+
+<h2 class="section-heading" id="version3">Version 3</h2>
+<p>
+    I released <code>v3.0</code> in April 2019, mostly just to bump the minimum version to PHP7 and add the enhanced
+    type information that had by that time become expected practice. There were no compelling new features in the release
+    although I did take advantage of the BC break to convert to using immutable objects (a feature request).
+</p>
+
+<p>
+    By this time (and well before if I'm honest), <i>PHPCoord</i> had become a mostly unmaintained project. Although I did
+    respond to any issues filed and check compatibility against each new version of PHP, maintenance was definitely
+    something that was on the reactive end of the spectrum. The release of version 3 was basically driven by
+    embarrassment<sup><a href="#fn7" id="f7">7</a></sup> with both the PHP7 change and the immutability change both
+    actually having been committed back in 2017. They just hadn't been released because there weren't any new features
+    to justify the cost/benefit of inflicting the BC break on existing users.
+</p>
+
+<h2 class="section-heading" id="contemplation">Contemplation</h2>
+<p>
+    After the release of version 3, I began to consider the future of <i>PHPCoord</i>. I was very conscious that despite the
+    grandiose name suggesting it was some kind of definitive library, a more accurate name for it would have been
+    <i>PHPBritishAndIrishCoordinatesWithAFeebleAttemptAtTheRestOfEuropeAndNorthAmerica</i>. I had obviously known right from the
+    start with <code>v1.0</code> that it didn't have any support for e.g. Australia, Africa or Asia, but back then I
+    had been under the erroneous impression Europe and the US were catered for. Because I'm British and our coordinate
+    system dates from 1936, when I copied the values from Wikipedia for NAD27 and ED50 I thought nothing of it.
+</p>
+
+<p>
+    It was only later (I'm not entirely sure when) it came to my attention that NAD27 had long since been replaced by
+    NAD83, and ED50 had long since been replaced by ETRS89. (Much later) subsequent research told me that for most
+    practical purposes those 2 newer systems are actually interchangeable with WGS84 and so they were in-fact kinda
+    covered if the end-user was also aware of that fact, but that particular anecdote shows my historically poor level
+    of subject knowledge for a library that I was responsible for.
+</p>
+
+<p>
+    So as I was considering the future of <i>PHPCoord</i>, there were 3 factors in play:
+</p>
+
+<ol>
+    <li>
+        As unsatisfied as I was with the state of affairs, was I truly ready to “abandon my baby”?
+    </li>
+    <li>
+        Was there an alternative library I could point people at? I hadn't found one back in 2010 when I first started
+        using <i>PHPcoord</i>, but that was many, many years ago. Maybe one existed now?
+    </li>
+    <li>
+        If the answers to the first two questions were “no”, what would it take to build something I was actually proud of?
+    </li>
+</ol>
+
+<p>
+    As it turned out, the answers to the first two questions were indeed “no”. When I had interviewed for jobs previously,
+    <i>PHPCoord</i> was not uncommonly a subject of discussion with my interviewers. Once, one of them revealed during discussion
+    that they'd even previously used it! So with a constant 200+ downloads per day, and an eye on my future career
+    prospects I was inclined to keep it going.
+</p>
+
+<p>
+    Secondly, when I searched on <i>Packagist</i> to see what else was out there, there was almost nothing. There were lots
+    of geocoding libraries, several geometry libraries and quite a few libraries that did distance calculations (some well,
+    some badly). However, for conversions between coordinate systems there was almost nothing. A couple of other projects
+    did just British conversions (apparently a popular need!), there was one project that did only Swiss conversions...and there was
+    <i>Proj4php</i>.
+</p>
+
+<p>
+    <i>Proj4php</i> on the surface seemed like an ideal candidate to point people at as a replacement library. The
+    <i>Proj</i> C++ library is well-regarded as a backbone of many GIS applications. However, the more I looked into
+    <i>Proj4php</i>, the more I despaired. Firstly, it's not maintained by the same people who maintain actual <i>Proj</i>.
+    That's a bad sign, because it means that the maintainers are mostly just transliterating someone else's code,
+    rather than actually understanding what's going on. Concepts and code structures that make sense for C++, a low level
+    language are probably not the same as idiomatic PHP. Secondly, it turns out that it's not a port of <i>Proj</i> the C++ library.
+    It's a port of <i>Proj4JS</i>, which is the one that claims to be a port of the original. Being twice-removed from the
+    source and its design decisions is even worse than being once-removed
+</p>
+
+<p>
+    Thirdly, it clearly isn't even trying to keep up with the core project with the commit history positively
+    anaemic. <i>Proj4php</i> receives releases approximately once a year, with the changelog for each one typically having
+    about 6 entries. Whilst my own project <i>PHPCoord</i> wasn't doing any better, if I was going to point people using it at
+    something that claimed to <strong>be</strong> <i>Proj</i> instead, I would have wanted it to at least be attempting to maintain parity
+    with the parent project. Some quick research shows that <i>Proj4JS</i> is actually a fork of <i>Proj</i> v4 from the time that Proj
+    itself had been having a fairly extensive duration "minimum maintenance" period as a mature project. Modern <i>Proj</i>, that powers
+    geospatial engines all over the place actually started to have a fundamental rewrite with
+    <a href="https://github.com/OSGeo/PROJ/blob/master/docs/source/news.rst#proj-500"><i>Proj</i> v5</a> and
+    <a href="https://github.com/OSGeo/PROJ/blob/master/docs/source/news.rst#600-release-notes"><i>Proj</i> v6</a>. <i>Proj4php</i>
+    does not have any of these changes, its fundamental architecture is based on designs that the parent project has
+    thrown away as not fit for purpose.
+</p>
+
+<p>
+    Fourthly, a quick scan through the release history and the outstanding issues, revealed that the conversion from
+    <i>Proj4JS</i> has been so badly done, that many of the issues being fixed in each release were not things like confusing the
+    return values of e.g. array methods between the two languages, but were fixes to put the missing <code>$</code> in
+    front of variable names. Even a basic lint check would have picked up those up (or, um, testing the code),
+    but issue, after issue, after issue for years have simply been fixing fatal syntax errors. The whole project to me,
+    although obviously well-meaning seems to me to be a complete horrowshow, and I sincerely hope that everyone involved
+    are just hobbyists rather than people employed for money as software-writing professionals.
+</p>
+
+<div class="text-center">
+    <a href="https://github.com/proj4js/proj4js/releases">
+        <img src="/img/posts/Proj4PHP%20releases.png" class="mw-100" alt="Screenshot of Proj4php changelog"/>
+    </a>
+</div>
+
+<h2 class="section-heading" id="therewrite">The rewrite</h2>
+<p>
+    With all that in mind, in August 2020 after <a href="/php-code-coverage">my PHP code coverage work</a> was released
+    I decided that I would invest back into <i>PHPCoord</i> to make it something I was proud of. And more than that, that I
+    would make an <strong>actual</strong> <i>Proj</i> equivalent for PHP because I'm stubborn like that. Not a port, or
+    any kind of copy, but a PHP-native reimagining of that particular problem space. “🎵Everything <i>Proj</i> can do,
+    I can do better” would be the new mantra.
+</p>
+
+<p>
+    I began doing research, discovering in the process just how large a job I had gotten myself into. In late
+    August<sup><a href="#fn8" id="f8">8</a></sup>, I made my first commit of the “new” <i>PHPCoord</i> deciding for a
+    couple of reasons to utilise a brand new, empty branch for the purpose.
+</p>
+
+<p>
+    Firstly, I didn't want to be mentally attached to/constrained by the existing code and its structure.
+    I wanted to come at things completely afresh (plus, seeing how similar/different the result would be to the current code
+    would be intellectually interesting). Secondly <code>v3.0</code>, although now bearing little resemblance to the
+    original <i>PHPcoord</i> that I'd forked, was still legally (and morally!) derived from the work of Jonathan Stott and
+    thus by necessity was published under the same GPL software license that he had used. Personally I dislike the GPL
+    finding it to be very preachy and akin to getting a sermon. If (and only if) I started from scratch and therefore
+    avoided all <a href="https://en.wikipedia.org/wiki/Ship_of_Theseus">Ship of Theseus</a> type issues, would I be
+    safely able to release under a different license, like the MIT.
+</p>
+
+<p>
+    I released <code>v4.0</code> in March 2021, after releasing a beta in January. It definitely took a <em>lot</em>
+    longer than I'd originally anticipated having started way back in August, but the results were definitely worth it!
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>v3.x</th>
+            <th>v4.x</th>
+            <th>v5.x</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>Coordinate systems supported</th>
+            <td>8 (for conversions) <br>10 (for distance)</td>
+            <td>6200+</td>
+            <td>6500+</td>
+        </tr>
+        <tr>
+            <th>Conversion methods<sup><a href="#fn9" id="f9">9</a></sup> supported</th>
+            <td>2</td>
+            <td>70</td>
+            <td>100</td>
+        </tr>
+        <tr>
+            <th>Units supported</th>
+            <td>2</td>
+            <td>48</td>
+            <td>48</td>
+        </tr>
+        <tr>
+            <th>Documentation</th>
+            <td>Basic readme</td>
+            <td>Full manual</td>
+            <td>Full manual</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>
+    April saw the addition of another major feature, that of the concept that where a coordinate system spans a wide
+    area, there are often multiple conversions to/from it that pertain to <em>part</em> of it only. <code>v4.2</code>
+    added the necessary polygon awareness to the codebase, with <code>v4.3</code> introducing the concept of “datapacks”,
+    8 optional/supplementary <i>Composer</i> packages that increased the accuracy of conversions by supplying the
+    necessary high-quality polygons.
+</p>
+
+<p>
+    <code>v4.4</code> in June went one step further and added the first support for gridfiles, enabling the absolute
+    highest accuracy conversions possible, commensurate with output of government tooling like <i>NCAT</i>, <i>GDAy</i>,
+    or <i>Circe</i>. The large size of the grid files means that they sadly cannot be distributed with the base package, but are only
+    available to datapack users.
+</p>
+
+<p>
+    <code>v4.5</code> and <code>v4.6</code> from September and October were mainly focused on optimisations.
+</p>
+
+<p>
+    Annoyingly, rather than have <code>v4.7</code> as the subsequent release, I was forced into releasing it as <code>v5.0</code>
+    due to a PHP8.1 deprecation that required changing constructor signature to address. I'd previously had no plans to
+    bump the major version again anytime soon, having done it less than a year earlier as it's obviously annoying for
+    consuming applications.
+</p>
+
+<p>
+    Obviously, the research needed to accurate determine the details of over 6000 coordinate systems and how to convert
+    between them is a mammoth undertaking, especially compared to the mere 10 that <i>PHPCoord</i> had previously
+    supported. Thankfully, I didn't have to do most of this research thanks to <a href="https://epsg.org/">EPSG</a>
+    whose work I very gratefully acknowledge. The EPSG dataset includes the definitions, the formulas, the parameters
+    and also in many cases worked examples that I was able to use to test the code with. The presence of this valuable
+    data inside modern versions of <i>PHPCoord</i> is why the license is the slightly clunky<sup><a href="#fn10" id="f10">10</a></sup>
+    <code>(MIT and proprietary)</code> since although the EPSG data is freely redistributable, it has its own license
+    rather than anything in the OSI list.
+</p>
+
+<h2 class="section-heading">What's next</h2>
+<p>
+    I'll certainly be doing regular minor releases to pick up new/improved coordinate system data from EPSG. Other than
+    that, I have plans to add import/export functionality for commonly used interchange formats like GeoJSON and WKT,
+    and some vague ideas about adding to/exposing the internal polygon functionality so that operations other than
+    conversions and distance calculations can be done. Maybe I'll write another blog post at the 15 year mark to see how
+    those predictions hold up 😁
+</p>
+
+<h4>Footnotes</h4>
+<p class="small">
+    <sup id="fn1"><a href="#f1">1</a></sup>
+    The Vincenty formula is more accurate but is slower and over the relatively small distances involved here
+    that difference was considered to be negligible. Especially since any formula used would be only be calculating
+    straight-line distance rather than actual road distance.
+</p>
+
+<p class="small">
+    <sup id="fn2"><a href="#f2">2</a></sup>
+    MySQL at the time did not have built-in support for spatial calculations, so I had to do the calculations the hard way.
+    I did consider installing PostgreSQL+PostGIS, but given my single server was already running both
+    Apache/PHP and MySQL decided it wouldn't be a good idea.
+</p>
+
+<p class="small">
+    <sup id="fn3"><a href="#f3">3</a></sup>
+    The SQL I constructed first culled the points of interest by evaluating a simple bounding box of roughly a few miles
+    in each direction (these were simple < and > conditions that the DB could use indexing for), and then ordered the
+    remaining points by haversine distance.
+</p>
+
+<p class="small">
+    <sup id="fn4"><a href="#f4">4</a></sup>
+    Approximately 15 months later I would have a shower thought and realise that I could just do distance calculations on
+    eastings and northings directly using simple Pythagoras rather than the complex trigonometry involved with
+    latitudes, longitudes and the haversine formula. Oops<sup><a href="#fn5" id="f5">5</a></sup>.
+</p>
+
+<p class="small">
+    <sup id="fn5"><a href="#f5">5</a></sup>
+    By this point though the search tool also had browser geolocation functionality which only returns the user location
+    in terms of latitude and longitude. This meant that I did still have a need for coordinate conversions, although now
+    it was in the opposite direction! If I'd realised about the Pythagoras trick at the same time I originally started
+    using <i>Code-Point Open</i>, I'm not sure that I would have ever sourced conversion routines just for geolocation purposes...
+</p>
+
+<p class="small">
+    <sup id="fn6"><a href="#f6">6</a></sup>
+    <i>Composer</i> hadn't been invented yet.
+</p>
+
+<p class="small">
+    <sup id="fn7"><a href="#f7">7</a></sup>
+    In 2019 I was considering quitting my then-current job, and decided I would prefer to have PHP7 code
+    and a recent release highlighted on my GitHub profile rather than PHP5 code from several years prior...
+</p>
+
+<p class="small">
+    <sup id="fn8"><a href="#f8">8</a></sup>
+    The published Git history shows October for this first commit, but I was developing on private branch for a long time
+    before merging to master and did many rebases along the way.
+</p>
+
+<p class="small">
+    <sup id="fn9"><a href="#f9">9</a></sup>
+    Refers to methods/formulas. Different mapping systems often use the same underlying formulas but with different parameters.
+</p>
+
+<p class="small">
+    <sup id="fn10"><a href="#f10">10</a></sup>
+    Apparently I'm the first person to ever release a package that was part OSI, part not because doing it <a href="https://github.com/composer/composer/issues/9144">broke Composer and Packagist</a>.
+</p>
+
+<span class="caption text-muted">
+    Header image by <a href="https://unsplash.com/@kylejglenn?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Kyle Glenn</a> on <a href="https://unsplash.com/s/photos/map?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</span>
