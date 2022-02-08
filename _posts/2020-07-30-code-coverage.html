@@ -162,7 +162,7 @@ public function pluralise(string $thing, int $count): string
 </blockquote>
 
 <p>
-    After waiting 5 years for this mysterious "somebody else"👀 to show up, I decided to give implementing it a
+    After waiting 5 years for this mysterious “somebody else”👀 to show up, I decided to give implementing it a
     go myself.
 </p>
 
@@ -175,7 +175,7 @@ public function pluralise(string $thing, int $count): string
 <p>
     In all but the simplest code, there are places where the execution path can diverge in 2 (or more ways). These occur
     at every decision point, for example at every <code>if</code>/<code>else</code> or <code>while</code>.
-    Each "side" of those divergence points is its own <dfn>branch</dfn>. Where there is no decision point, then the
+    Each “side” of those divergence points is its own <dfn>branch</dfn>. Where there is no decision point, then the
     execution flow has just a single branch.
 </p>
 
@@ -239,7 +239,7 @@ public function pluralise(string $thing, int $count): string
 <p>
     Mentally mapping branches back to individual pieces of source code is a new skill that takes a little bit of
     practice, but it's definitely easier to perform on code that is easy to read and understand in the first place.
-    If your code is full of "clever" 1-liners where multiple pieces of logic combine like this one, then expect more
+    If your code is full of “clever” 1-liners where multiple pieces of logic combine like this one, then expect more
     difficulty compared to code that prefers to structure things over multiple lines where the line/branch relationship
     is more likely to be 1-1. Written in a different style, the same logic would look this instead:
 </p>
@@ -393,7 +393,7 @@ final class File extends AbstractNode
 <h2 class="section-heading" id="which">Which metric should I use?</h2>
 <p>
     Speaking personally, I will be using the new metrics wherever possible, and having tested them against a few
-    different codebases to figure out what "normal" looks like, I think I'm likely to settle on the hybrid approach
+    different codebases to figure out what “normal” looks like, I think I'm likely to settle on the hybrid approach
     outlined below for my own projects. For professional corporate work, whether to switch metrics is obviously a team
     discussion and I look forward with interest to find out if wider consensus is in alignment with my own thinking or
     if it goes in a different direction.
@@ -444,7 +444,7 @@ final class File extends AbstractNode
 <p>
     Generating branch and path based coverage is still approximately 3𝑥-5𝑥 slower though so do take that into account.
     You may wish to consider enabling it selectively, perhaps only when running individual test files rather than the
-    entire test suite, or on a nightly "enhanced coverage" build rather than every push to CI.
+    entire test suite, or on a nightly “enhanced coverage” build rather than every push to CI.
 </p>
 
 <p>
