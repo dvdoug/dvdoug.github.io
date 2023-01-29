@@ -37,7 +37,7 @@ google_analytics: UA-173978394-1
 
 # Build settings
 timezone: Europe/London
-remote_theme: StartBootstrap/startbootstrap-clean-blog-jekyll
+theme: jekyll-theme-clean-blog
 markdown: kramdown
 paginate: 5
 paginate_path: "/posts/page:num/"
