@@ -11,7 +11,7 @@ In my day job I help to make awesome PHP applications that help to bring the wor
 
 Sometimes in my career, I've looked for a library to complete what I imagined to be a fairly common task and to my surprise have found that one either doesn't exist or has been abandoned by it's original author. This makes me sad, sometimes sad enough that I've decided to do something about it 😇.
 
-Those libraries have now recorded over 750,000 downloads on Packagist so I'm fairly confident that there are people out there using them to do all sorts of wonderful things which gives me warm and fuzzy feelings.
+Those libraries have now recorded over 2,000,000 downloads on Packagist so I'm fairly confident that there are people out there using them to do all sorts of wonderful things which gives me warm and fuzzy feelings.
 
 ## 📦[BoxPacker](https://boxpacker.io) [![Download count](https://img.shields.io/packagist/dt/dvdoug/boxpacker.svg)](https://packagist.org/packages/dvdoug/boxpacker)
 An original creation because nothing else in PHP-land existed. When you try and get a pricing quote from a courier, you're asked for the width/length/depth of the box and it's weight. When you're working in e-commerce, weight is easy: you simply add up the individual weights of the all the stuff the customer ordered. But the dimensions of the box(es)? That's....more complex.
