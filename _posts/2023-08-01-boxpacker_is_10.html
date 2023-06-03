@@ -1,0 +1,277 @@
+---
+layout: post
+title: "BoxPacker is 10!"
+subtitle: "Documenting the project history"
+background: '/img/bg-box.jpg'
+permalink: /boxpacker-is-10
+---
+
+<p class="lead">
+    Ten years ago, in August 2013, I made the first release of the <i>BoxPacker</i> project on GitHub. This
+    is a reconstructed record of the project's origins and subsequent development.
+</p>
+
+<nav>
+    <h2 class="section-heading">Contents</h2>
+    <ol>
+        <li><a href="#origins">Origins of the project</a></li>
+        <li><a href="#introducing-boxpacker">Introducing BoxPacker</a></li>
+        <li><a href="#stabilisation">Stabilisation</a></li>
+        <li><a href="#optimisation">Optimisation</a></li>
+        <li><a href="#evolution">Evolution</a></li>
+    </ol>
+</nav>
+
+<h2 class="section-heading" id="origins">Origins of the project</h2>
+
+<p>
+    I used to work for an educational non-profit that was focused on the area of nurseries and pre-schools. The
+    organisation ran about 100 of these directly, and provided advice and support to approx 13,000 others. As part
+    of my role in looking after the technical side of the organisation's website, I was responsible for our online
+    bookstore where all sorts of books were offered for sale - some advice type, some practical (e.g. blank attendance
+    registers). The system went through all kinds of evolutions whilst I was there, but one common factor was that it
+    was not easily possible to use an off-the-shelf solution due to some <em>unique</em> business requirements, including
+    the requirement to offer discounts to members of the organisation (which were not a fixed % off). This requirement
+    to have a dual-price list caused havoc, resulting eventually in a decision of mine to just write everything from
+    scratch rather than try to maintain a forked copy of any existing open source ecommerce solution.
+</p>
+
+<p>
+    For many years the organisation had outsourced the non-online portions (operating an order phone line, pick, pack
+    dispatch) to external companies but this had always proved challenging - there were an endless series of customer
+    complaints about being charged the regular price instead of the discounted one, and the split of the phone numbers
+    (and staff) between those who could offer advice and those who could sell things was also frustrating.
+</p>
+
+<p>
+    In 2011, the decision was made to in-source almost everything - the printing firm that physically made most of the
+    items that were sold kindly agreed to handle dispatching to individual customers (something they'd never done before)
+    and I was tasked with building everything to enable that. That involved some interesting challenges, e.g. I'd never
+    had to care about stock levels before (something was either eligible for purchase or not) and making sure that
+    customer details and Royal Mail pre-printed postage insignia ended up on the right place on address labels.
+</p>
+
+<p>
+    Another postage-related challenge that I found I needed to tackle was sending customer orders via the most
+    cost-efficient route. For example, many orders could go 2nd Class post but over a certain weight 2nd Class is
+    not available anymore, only 1st Class. Certain over-size items (e.g. posters in poster tubes) couldn't be sent
+    via regular post at all, but needed to be sent via a parcel service.
+</p>
+
+<p>
+    “Obviously” (haha), we couldn't be the first people doing ecommerce to need to figure out the box size for an order,
+    there must be well-known solutions to that problem that Google would reveal. Some PHP library I could just use. Right?
+</p>
+
+<p>
+    No. Not even a little.
+</p>
+
+<p>
+    For several weeks, I researched every academic paper I could trying to find one that included source code. Eventually
+    I found one that included some C. I ported it to PHP. It didn't work. I spent days looking for the reason, couldn't
+    find a typo. Deleted, started over. It still didn't work.
+</p>
+
+<p>
+    Eventually, I gave up - I'd already spent more time than was justifiable, so I wrote up a quick bodge that simply
+    calculated the order weight, and then special cased the few annoyingly large items. On the whole, it worked pretty
+    well. The only downside was that where we got large orders, the person doing the packing had to manually go back
+    into the system to print off duplicate labels for any boxes >=2. We didn't get many large orders though, so this
+    was a really just a minor annoyance.
+</p>
+
+<p>
+    There was one use case where the bodge wasn't enough, which was international orders. About once a week we'd get an
+    order to be sent overseas. Whereas for UK-based orders we charged flat-rate postage, international orders were priced
+    up individually - historically these were only taken over the phone, someone would physically prepare the order up to
+    the point of sealing the box, weigh + measure the box(s), calculate the shipping costs, then go back to the customer
+    and see if they happy with the price and still wanted to proceed.
+</p>
+<p>
+    Our international courier had an API to calculate
+    rates, so in theory we could start doing online orders too but the required fields included box dimensions.
+    I found a different company online that had a free API that would do the virtual packing necessary and hooked that
+    up so that we could get the correct information for the courier to price things up. It felt like a decision that
+    was going to backfire one day, but as a 1-person development team on a short deadline I went with it.
+</p>
+
+{% highlight php %}
+/*
+ * Parcel packing (aka 3D bin packing problem)
+ * i.e. how many/how big will the parcels be
+ * XXX uses free API to do it. Should re-implement ourselves for speed/control
+ */
+{% endhighlight %}
+
+<p>
+    A couple of years passed. Then in July 2013, the free API that we'd been using for those international orders
+    suddenly went offline. The world's worst quick-fix was promptly implemented as a virtual packing replacement
+    (just stack items on top of each other) which restored somewhat-normal service although at inflated shipping
+    prices.
+</p>
+
+<p>
+    However, a proper solution was needed, and needed urgently.
+</p>
+
+<h2 class="section-heading" id="introducing-boxpacker">Introducing BoxPacker</h2>
+
+<p>
+    The inability of myself in 2011 during working time to get any kind of in-house solution working by porting other
+    people's work to PHP had annoyed me to the extent that during 2012 I did start toying with some code to try and
+    do something myself. I really hadn't gotten very far though, really all I'd done before getting bored with it was
+    creating some interfaces. These <code>Box</code> and <code>Item</code> interfaces were the very first lines of
+    code I ever wrote for the project, and they remain the absolute core of the project even today - I have no
+    recollection of exactly why I chose to make them interfaces back then rather than concrete classes, but looking
+    back it remains a decision I think I got exactly right - allowing consuming applications to pass in their own
+    objects rather than convert to/from BoxPacker specific data structures is one my favourite features.
+</p>
+
+<p>
+    So, 2013 hit and I had a sudden professional need for a virtual packing solution. So I wrote up a more robust version
+    of my just-stack-items-on-top-of-each-other approach, and released <code>v0.1</code>, followed the next day by
+    <code>v0.2</code> which could split an order into multiple boxes and <code>v0.3</code> shortly thereafter which
+    could pack items side by side and not just stacked vertically. By this point, I was confident that the calculations
+    were all physically correct (if dumb) and integrated my solution back into my actual work project.
+</p>
+
+<p>
+    Having a code-based solution now, I also integrated into the UK dispatch process too, so that we could automatically
+    print the correct number of address labels for large orders, and also create customised dispatch notes for each
+    box.
+</p>
+
+<p>
+    For completely unrelated reasons, that week with the emergency integration of my personal project happened to be my
+    last week at the non-profit. In fact, I haven't worked in the ecommerce space since! All subsequent releases of
+    BoxPacker have been driven purely by self-motivation and the feature requests from users, and not an actual business
+    need originating from any of my then-employers. Despite that, BoxPacker has moved from strength to strength.
+</p>
+
+<h2 class="section-heading" id="stabilisation">Stabilisation</h2>
+
+<p>
+    Weight-(re)distribution (preferring 2 medium-weight boxes rather than 1 large, heavy box and 1 small, light box)
+    followed 3 months after all that in the first officially stable release <code>v1.0</code> and is one of my favourite
+    features. As far as I know, BoxPacker is the only open-source library (of any language) that incorporates the
+    real-world aspect that people don't like lifting heavy things into its packing solutions. Of course this can be
+    turned off for maximum packing efficiency if desired.
+</p>
+
+<p>
+    A series of <code>v1.x</code> minor releases followed over 2014 and 2015 as other people started to use the library
+    and reported issues or requested features. I also made some improvements to packing efficiency over this time period
+</p>
+
+<p>
+    2016 saw an API-breaking change to the <code>Item</code> interface in <code>v2.0</code> to indicate whether an item
+    should be shipped-flat or could be rotated arbitrarily. Although the library had always worked in full 3D space, as
+    it had originally been conceived to ship books it assumed everything would always be kept flat and didn't ever
+    consider turning items onto their sides. The initial <code>v2.x</code> releases didn't actually do anything with
+    this information, this changed with <code>v2.2</code> in 2017.
+</p>
+
+<p>
+    That year also saw the introduction of the first callback system to allow for produced packing solutions to take
+    into account custom constraints such as capping the number of dangerous items (e.g. batteries) in a single box.
+</p>
+
+<h2 class="section-heading" id="optimisation">Optimisation</h2>
+
+<p>
+    Finally 2017 also had the release of <code>v3.0</code>. The main user-facing change was the detailed tracking of
+    the placement of each individual item within a box - previous the library had simply kept a running total internally
+    of how far along each axis the "cursor" was. This allowed for more sophisticated customs constraints to be handled,
+    and also helped with debugging. The BC break also enabled me to change the declared API of the <code>ItemList</code>
+    and <code>BoxList</code> classes which had previously used (and directly extended from) PHP's built-in
+    <code>SplHeap</code>.
+</p>
+
+<p>
+    Back in 2012 when I had first created those classes I thought I had been doing the right thing by using the
+    <code>SplHeap</code> data structures rather than a simple array - as data structures explicitly designed for working
+    with ordered lists, I simply assumed they'd be faster and quicker.
+</p>
+
+<p>
+    I was wrong. Very wrong. 🤦‍♂️
+</p>
+
+<p>
+    It actually turns out that the operations BoxPacker needs to do (and frequently) mean that using a <code>SplHeap</code>
+    has terrible, awful performance. For a start, you can't simply iterate over one because there's no concept of an internal
+    pointer - iteration actually involves removing the top element on each invocation of <code>->next()</code>. That means
+    to do a non-destructive iteration you have to operate on a cloned copy of the <code>SplHeap</code>. Secondly, because
+    <code>SplHeap</code> is a classic textbook heap, each time that top item was removed so the library could get a look
+    at the next item the heap had to be rebalanced which meant calling the internal sort functions over and over again.
+    Simple iteration actually meant sorting the heap over and over and over again. For small lists this impact was
+    fairly small, but when investigating  performance on larger packing problems I found that BoxPacker was sometimes
+    spending more time in sorting a list than on actually doing any of the more complex decisioning work!
+</p>
+
+<p>
+    So from <code>v3.0</code>, BoxPacker uses a simple wrapped array that can be sorted just once and then iterated over
+    easily and quickly.
+</p>
+
+<h2 class="section-heading" id="evolution">Evolution</h2>
+
+<p>
+    2018 saw the introduction of the optional <i>Infallible</i> packing mode where if BoxPacker couldn't pack an item
+    for any reason (e.g. no boxes large enough) it would simply keep track of that rather than throw and exception and
+    crash as some users of the library had items that they would make custom arrangements for if ordered.
+</p>
+
+<p>
+    2019's main feature was improving the custom constraint system so that the constraints could take into account
+    the proposed placement of an item and not just its inherent properties (e.g. the constraint could now be "don't stack
+    batteries" rather than just "no more than 2 per box").
+</p>
+
+<p>
+    2020 saw the introduction of another feature, the <code>LimitedSupplyBox</code>. Until then, BoxPacker had always
+    assumed that there were an effectively unlimited number of each box size available for use, with the assumption
+    that if any particular type was running low then more would simply be ordered in. <code>LimitedSupplyBox</code>
+    allowed BoxPacker to work better in situations were stock was more tightly constrained, ensuring that it wouldn't
+    deliver a packing solution that couldn't actually be acted upon.
+</p>
+
+<p>
+    2021's main implementation-level feature was improved support for using BoxPacker in side-loading scenarios
+    (e.g. trucks), which adds some additional restrictions to the proposed placements that aren't applicable when
+    loading from the top (i.e. a box). However, the main feature of 2021 for me was the introduction of an often-requested
+    visualiser, to actually "see" the packing. Until then, I'd not actually even developed a rough-and-ready one
+    for myself, any/all visualisation when debugging something I'd just done in my head, limited to just the placement
+    of the 1 or 2 individual items I was trying to troubleshoot. With the new visualiser, it became a lot easier to
+    see patterns and improve the heuristics.
+</p>
+
+<img src="/img/visualiser.png" alt="BoxPacker Visualiser" style="max-width: 1000px">
+
+<p>
+    2022 saw hooks added to BoxPacker to allow library users to control every aspect of how things are sorted. The
+    default rules are still perfect for most ecommerce usecases, but non-ecommerce usecases kept climbing into the
+    feature requests 😅, and the new hooks allow for every user to tailor things to their precise needs.
+</p>
+
+<p>
+    2023's BoxPacker highlight will be the release of <code>v4.0</code>, cleaning up various deprecated features, using
+    modern PHP in the core and replacing the simple <code>keepFlat</code> rotation control toggle with a more
+    sophisticated set of rotation enums <code>Never</code>, <code>KeepFlat</code> and <code>BestFit</code>.
+</p>
+
+<h2 class="section-heading">What's next</h2>
+<p>
+    There is no perfect algorithm to do box packing other than brute force try-every-permutation but there are a few
+    examples in the GitHub issues of the project that I feel the library should be able to handle smarter. The nature
+    of heuristics though means that it's really easy to get any specific example packing better by tuning a decision,
+    the problem is that making that one reported case better tends to regress many more examples meaning that fixes
+    for specific testcases are becoming increasingly more challenging as the library gets better.
+</p>
+
+<p>
+    There are also some feature requests that involve challenging fundamental assumptions that both items and boxes
+    can be modelled as simple cuboids - bags/envelopes have varying geometry depending on how close to the seam you are,
+    and that's a whole new challenge!
+</p>
