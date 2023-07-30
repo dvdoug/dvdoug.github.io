@@ -64,3 +64,10 @@ exclude:
    - vendor/ruby/
 
 livereload: true
+
+defaults:
+   -
+      scope:
+         path:            "assets/coverage-blog"
+      values:
+         sitemap:         false

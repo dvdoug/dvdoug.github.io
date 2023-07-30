@@ -17,6 +17,7 @@ gem "jekyll", "~> 4.1"
 group :jekyll_plugins do
   gem "jekyll-feed", "~> 0.15"
   gem "jekyll-paginate", "~> 1.1"
+  gem "jekyll-sitemap", "~> 1.4"
   gem "jekyll-theme-clean-blog", "~> 4.0"
 end
 
