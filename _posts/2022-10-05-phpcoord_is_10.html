@@ -88,12 +88,12 @@ permalink: /phpcoord-is-10
 
 <p>
     For the next couple of years, everything went well. Periodically I updated <i>Code-Point Open</i> to populate the database
-    with any newly created postcodes, and <i>PHPcoord</i> continued to calculate the appropriate latitude and longitudes for
+    with any newly created postcodes, and PHPCoord continued to calculate the appropriate latitude and longitudes for
     them.
 </p>
 
 <p>
-    However, it was becoming increasingly clear that <i>PHPcoord</i> was an abandoned library (the author's website had
+    However, it was becoming increasingly clear that PHPCoord was an abandoned library (the author's website had
     been hacked for years just displaying spam) and therefore the code was never going to be updated for modern PHP.
 </p>
 
@@ -107,7 +107,7 @@ permalink: /phpcoord-is-10
 <p>
     It's often said that one of the hardest problems in computing is naming things, and the first problem I had was
     what to call the fork. I decided that since this wasn't an original work, it would be morally dishonest to give the
-    codebase a completely different name, however I did choose to change the capitalisation (to <i>PHPCoord</i>) since the
+    codebase a completely different name, however I did choose to change the capitalisation (to PHPCoord) since the
     original was always weird to me. For similar reasons, I chose to use <code>php-coord/php-coord</code> as the package
     name for Packagist because I felt that using my own name for the vendor portion would not really be honest.
 </p>
@@ -119,7 +119,7 @@ permalink: /phpcoord-is-10
 </p>
 
 <p>
-    For a version number, I opted against continuing the numbering sequence of <i>PHPcoord</i>, just in case the original
+    For a version number, I opted against continuing the numbering sequence of PHPCoord, just in case the original
     author ever did come back and release something new. I decided that with the new name, this was a new project and
     thus the first release was <code>v1.0</code>.
 </p>
@@ -138,15 +138,15 @@ permalink: /phpcoord-is-10
     to fix. As part of cross-checking what the expected behaviour should actually be though before changing it, I came
     across some worked conversion examples from Ordnance Survey. Those revealed that one of the conversion parameters
     in the code was also slightly wrong (appeared to be a typo), which I was also able to fix. Furthermore, the Ordnance
-    Survey documentation explained that the conversion in question was only approximate and thus revealed the <i>PHPcoord</i>
+    Survey documentation explained that the conversion in question was only approximate and thus revealed the PHPCoord
     code was making the classic mistake of confusing the number of decimal places in the output of a calculation with
     its accuracy. That was corrected too, by rounding off to a suitable number of decimal places.
 </p>
 
 <p>
     I did add one new feature to that initial release, which was an expanded set of geographical knowledge. The original
-    <i>PHPcoord</i> only knew about (and could only convert between), the global WGS84 (GPS) coordinate system and the
-    OSGB36 (British) system. Forked <i>PHPCoord</i> also knew about ED50 and NAD27, the appropriate conversion values
+    PHPCoord only knew about (and could only convert between), the global WGS84 (GPS) coordinate system and the
+    OSGB36 (British) system. Forked PHPCoord also knew about ED50 and NAD27, the appropriate conversion values
     to/from WGS84 for them being taken from a page on Wikipedia.
 </p>
 
@@ -189,7 +189,7 @@ permalink: /phpcoord-is-10
 </p>
 
 <p>
-    By this time (and well before if I'm honest), <i>PHPCoord</i> had become a mostly unmaintained project. Although I did
+    By this time (and well before if I'm honest), PHPCoord had become a mostly unmaintained project. Although I did
     respond to any issues filed and check compatibility against each new version of PHP, maintenance was definitely
     something that was on the reactive end of the spectrum. The release of version 3 was basically driven by
     embarrassment<sup><a href="#fn7" id="f7">7</a></sup> with both the PHP7 change and the immutability change both
@@ -199,7 +199,7 @@ permalink: /phpcoord-is-10
 
 <h2 class="section-heading" id="contemplation">Contemplation</h2>
 <p>
-    After the release of version 3, I began to consider the future of <i>PHPCoord</i>. I was very conscious that despite the
+    After the release of version 3, I began to consider the future of PHPCoord. I was very conscious that despite the
     grandiose name suggesting it was some kind of definitive library, a more accurate name for it would have been
     <i>PHPBritishAndIrishCoordinatesWithAFeebleAttemptAtTheRestOfEuropeAndNorthAmerica</i>. I had obviously known right from the
     start with <code>v1.0</code> that it didn't have any support for e.g. Australia, Africa or Asia, but back then I
@@ -216,7 +216,7 @@ permalink: /phpcoord-is-10
 </p>
 
 <p>
-    So as I was considering the future of <i>PHPCoord</i>, there were 3 factors in play:
+    So as I was considering the future of PHPCoord, there were 3 factors in play:
 </p>
 
 <ol>
@@ -225,7 +225,7 @@ permalink: /phpcoord-is-10
     </li>
     <li>
         Was there an alternative library I could point people at? I hadn't found one back in 2010 when I first started
-        using <i>PHPcoord</i>, but that was many, many years ago. Maybe one existed now?
+        using PHPCoord, but that was many, many years ago. Maybe one existed now?
     </li>
     <li>
         If the answers to the first two questions were “no”, what would it take to build something I was actually proud of?
@@ -234,7 +234,7 @@ permalink: /phpcoord-is-10
 
 <p>
     As it turned out, the answers to the first two questions were indeed “no”. When I had interviewed for jobs previously,
-    <i>PHPCoord</i> was not uncommonly a subject of discussion with my interviewers. Once, one of them revealed during discussion
+    PHPCoord was not uncommonly a subject of discussion with my interviewers. Once, one of them revealed during discussion
     that they'd even previously used it! So with a constant 200+ downloads per day, and an eye on my future career
     prospects I was inclined to keep it going.
 </p>
@@ -248,26 +248,26 @@ permalink: /phpcoord-is-10
 </p>
 
 <p>
-    <i>Proj4php</i> on the surface seemed like an ideal candidate to point people at as a replacement library. The
+    Proj4php on the surface seemed like an ideal candidate to point people at as a replacement library. The
     <i>Proj</i> C++ library is well-regarded as a backbone of many GIS applications. However, the more I looked into
-    <i>Proj4php</i>, the more I despaired. Firstly, it's not maintained by the same people who maintain actual <i>Proj</i>.
+    Proj4php, the more I despaired. Firstly, it's not maintained by the same people who maintain actual Proj.
     That's a bad sign, because it means that the maintainers are mostly just transliterating someone else's code,
     rather than actually understanding what's going on. Concepts and code structures that make sense for C++, a low level
-    language are probably not the same as idiomatic PHP. Secondly, it turns out that it's not a port of <i>Proj</i> the C++ library.
+    language are probably not the same as idiomatic PHP. Secondly, it turns out that it's not a port of Proj the C++ library.
     It's a port of <i>Proj4JS</i>, which is the one that claims to be a port of the original. Being twice-removed from the
     source and its design decisions is even worse than being once-removed
 </p>
 
 <p>
     Thirdly, it clearly isn't even trying to keep up with the core project with the commit history positively
-    anaemic. <i>Proj4php</i> receives releases approximately once a year, with the changelog for each one typically having
-    about 6 entries. Whilst my own project <i>PHPCoord</i> wasn't doing any better, if I was going to point people using it at
-    something that claimed to <strong>be</strong> <i>Proj</i> instead, I would have wanted it to at least be attempting to maintain parity
-    with the parent project. Some quick research shows that <i>Proj4JS</i> is actually a fork of <i>Proj</i> v4 from the time that Proj
-    itself had been having a fairly extensive duration "minimum maintenance" period as a mature project. Modern <i>Proj</i>, that powers
+    anaemic. Proj4php receives releases approximately once a year, with the changelog for each one typically having
+    about 6 entries. Whilst my own project PHPCoord wasn't doing any better, if I was going to point people using it at
+    something that claimed to <strong>be</strong> Proj instead, I would have wanted it to at least be attempting to maintain parity
+    with the parent project. Some quick research shows that <i>Proj4JS</i> is actually a fork of Proj v4 from the time that Proj
+    itself had been having a fairly extensive duration "minimum maintenance" period as a mature project. Modern Proj, that powers
     geospatial engines all over the place actually started to have a fundamental rewrite with
-    <a href="https://github.com/OSGeo/PROJ/blob/master/docs/source/news.rst#proj-500"><i>Proj</i> v5</a> and
-    <a href="https://github.com/OSGeo/PROJ/blob/master/docs/source/news.rst#600-release-notes"><i>Proj</i> v6</a>. <i>Proj4php</i>
+    <a href="https://github.com/OSGeo/PROJ/blob/master/docs/source/news.rst#proj-500">Proj v5</a> and
+    <a href="https://github.com/OSGeo/PROJ/blob/master/docs/source/news.rst#600-release-notes">Proj v6</a>. Proj4php
     does not have any of these changes, its fundamental architecture is based on designs that the parent project has
     thrown away as not fit for purpose.
 </p>
@@ -291,15 +291,15 @@ permalink: /phpcoord-is-10
 <h2 class="section-heading" id="therewrite">The rewrite</h2>
 <p>
     With all that in mind, in August 2020 after <a href="/php-code-coverage">my PHP code coverage work</a> was released
-    I decided that I would invest back into <i>PHPCoord</i> to make it something I was proud of. And more than that, that I
-    would make an <strong>actual</strong> <i>Proj</i> equivalent for PHP because I'm stubborn like that. Not a port, or
-    any kind of copy, but a PHP-native reimagining of that particular problem space. “🎵Everything <i>Proj</i> can do,
+    I decided that I would invest back into PHPCoord to make it something I was proud of. And more than that, that I
+    would make an <strong>actual</strong> Proj equivalent for PHP because I'm stubborn like that. Not a port, or
+    any kind of copy, but a PHP-native reimagining of that particular problem space. “🎵Everything Proj can do,
     I can do better” would be the new mantra.
 </p>
 
 <p>
     I began doing research, discovering in the process just how large a job I had gotten myself into. In late
-    August<sup><a href="#fn8" id="f8">8</a></sup>, I made my first commit of the “new” <i>PHPCoord</i> deciding for a
+    August<sup><a href="#fn8" id="f8">8</a></sup>, I made my first commit of the “new” PHPCoord deciding for a
     couple of reasons to utilise a brand new, empty branch for the purpose.
 </p>
 
@@ -307,7 +307,7 @@ permalink: /phpcoord-is-10
     Firstly, I didn't want to be mentally attached to/constrained by the existing code and its structure.
     I wanted to come at things completely afresh (plus, seeing how similar/different the result would be to the current code
     would be intellectually interesting). Secondly <code>v3.0</code>, although now bearing little resemblance to the
-    original <i>PHPcoord</i> that I'd forked, was still legally (and morally!) derived from the work of Jonathan Stott and
+    original PHPCoord that I'd forked, was still legally (and morally!) derived from the work of Jonathan Stott and
     thus by necessity was published under the same GPL software license that he had used. Personally I dislike the GPL
     finding it to be very preachy and akin to getting a sermon. If (and only if) I started from scratch and therefore
     avoided all <a href="https://en.wikipedia.org/wiki/Ship_of_Theseus">Ship of Theseus</a> type issues, would I be
@@ -384,11 +384,11 @@ permalink: /phpcoord-is-10
 
 <p>
     Obviously, the research needed to accurate determine the details of over 6000 coordinate systems and how to convert
-    between them is a mammoth undertaking, especially compared to the mere 10 that <i>PHPCoord</i> had previously
+    between them is a mammoth undertaking, especially compared to the mere 10 that PHPCoord had previously
     supported. Thankfully, I didn't have to do most of this research thanks to <a href="https://epsg.org/">EPSG</a>
     whose work I very gratefully acknowledge. The EPSG dataset includes the definitions, the formulas, the parameters
     and also in many cases worked examples that I was able to use to test the code with. The presence of this valuable
-    data inside modern versions of <i>PHPCoord</i> is why the license is the slightly clunky<sup><a href="#fn10" id="f10">10</a></sup>
+    data inside modern versions of PHPCoord is why the license is the slightly clunky<sup><a href="#fn10" id="f10">10</a></sup>
     <code>(MIT and proprietary)</code> since although the EPSG data is freely redistributable, it has its own license
     rather than anything in the OSI list.
 </p>
