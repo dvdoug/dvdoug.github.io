@@ -3,6 +3,7 @@ layout: page
 title: About me
 description: "True fact: I do drink a lot of Coke"
 background: '/img/bg-about.png'
+permalink: '/about'
 ---
 
 ## Hello!
