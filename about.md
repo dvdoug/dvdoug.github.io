@@ -15,7 +15,7 @@ Sometimes in my career, I've looked for a library to complete what I imagined to
 surprise have found that one either doesn't exist or has been abandoned by its original author. This makes me sad,
 sometimes sad enough that I've decided to do something about it 😇.
 
-Those libraries have now recorded over 2,500,000 downloads so I'm fairly confident that there are people out
+Those libraries have now recorded over 6,000,000 downloads so I'm fairly confident that there are people out
 there using them to do all sorts of wonderful things.
 
 ## 📦[BoxPacker](https://boxpacker.io) [![Download count](https://img.shields.io/packagist/dt/dvdoug/boxpacker.svg)](https://packagist.org/packages/dvdoug/boxpacker)
@@ -33,7 +33,7 @@ what national mapping authorities think it is then you need a conversion library
 first needed to do co-ordinate conversion, but was written for an old version of PHP. I polished it up, fixed some bugs
 and added some features.
 
-Since then, the project has been completely rewritten and now supports over 6000 different coordinate systems, up from
+Since then, the project has been completely rewritten and now supports over 7,000 different coordinate systems, up from
 just 10 in previous versions.
 
 ## 📈[Behat Code Coverage](https://behat.cc) [![Download count](https://img.shields.io/packagist/dt/dvdoug/behat-code-coverage.svg)](https://packagist.org/packages/dvdoug/behat-code-coverage)
@@ -47,4 +47,3 @@ In 2020 I did substantial work enhancing the code coverage statistics reported b
 contributed performance enhancements that make coverage generation quicker even when not using the new metrics.
 
 An in-depth writeup of the changes is available to read [here](https://doug.codes/php-code-coverage).
-
