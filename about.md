@@ -15,7 +15,7 @@ Sometimes in my career, I've looked for a library to complete what I imagined to
 surprise have found that one either doesn't exist or has been abandoned by its original author. This makes me sad,
 sometimes sad enough that I've decided to do something about it 😇.
 
-Those libraries have now recorded over 6,000,000 downloads so I'm fairly confident that there are people out
+Those libraries have now recorded over 7,500,000 downloads so I'm fairly confident that there are people out
 there using them to do all sorts of wonderful things.
 
 ## 📦[BoxPacker](https://boxpacker.io) [![Download count](https://img.shields.io/packagist/dt/dvdoug/boxpacker.svg)](https://packagist.org/packages/dvdoug/boxpacker)
