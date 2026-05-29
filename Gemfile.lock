@@ -21,7 +21,7 @@ GEM
     google-protobuf (4.35.0-x64-mingw-ucrt)
       bigdecimal
       rake (~> 13.3)
-    http_parser.rb (0.8.0)
+    http_parser.rb (0.8.1)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     jekyll (4.4.1)
