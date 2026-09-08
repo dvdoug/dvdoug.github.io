@@ -181,7 +181,7 @@ permalink: /boxpacker-is-10
 
 <p>
     Finally 2017 also had the release of <code>v3.0</code>. The main user-facing change was the detailed tracking of
-    the placement of each individual item within a box - previous the library had simply kept a running total internally
+    the placement of each individual item within a box - previously the library had simply kept a running total internally
     of how far along each axis the "cursor" was. This allowed for more sophisticated custom constraints to be handled,
     and also helped with debugging. The BC break also enabled me to change the declared API of the <code>ItemList</code>
     and <code>BoxList</code> classes which had previously used (and directly extended from) PHP's built-in
@@ -219,7 +219,7 @@ permalink: /boxpacker-is-10
 
 <p>
     2018 saw the introduction of the optional <i>Infallible</i> packing mode where if BoxPacker couldn't pack an item
-    for any reason (e.g. no boxes large enough) it would simply keep track of that rather than throw and exception and
+    for any reason (e.g. no boxes large enough) it would simply keep track of that rather than throw an exception and
     crash as some users of the library had items that they would make custom arrangements for if ordered.
 </p>
 
@@ -233,7 +233,7 @@ permalink: /boxpacker-is-10
     2020 saw the introduction of another feature, the <code>LimitedSupplyBox</code>. Until then, BoxPacker had always
     assumed that there were an effectively unlimited number of each box size available for use, with the assumption
     that if any particular type was running low then more would simply be ordered in. <code>LimitedSupplyBox</code>
-    allowed BoxPacker to work better in situations were stock was more tightly constrained, ensuring that it wouldn't
+    allowed BoxPacker to work better in situations where stock was more tightly constrained, ensuring that it wouldn't
     deliver a packing solution that couldn't actually be acted upon.
 </p>
 
