@@ -15,7 +15,7 @@ Sometimes in my career, I've looked for a library to complete what I imagined to
 surprise have found that one either doesn't exist or has been abandoned by its original author. This makes me sad,
 sometimes sad enough that I've decided to do something about it 😇.
 
-Those libraries have now recorded over 7,500,000 downloads so I'm fairly confident that there are people out
+Those libraries have now recorded over <!-- DOWNLOADS:START -->7,500,000<!-- DOWNLOADS:END --> downloads so I'm fairly confident that there are people out
 there using them to do all sorts of wonderful things.
 
 ## 📦[BoxPacker](https://boxpacker.io) [![Download count](https://img.shields.io/packagist/dt/dvdoug/boxpacker.svg)](https://packagist.org/packages/dvdoug/boxpacker)
@@ -33,7 +33,7 @@ what national mapping authorities think it is then you need a conversion library
 first needed to do co-ordinate conversion, but was written for an old version of PHP. I polished it up, fixed some bugs
 and added some features.
 
-Since then, the project has been completely rewritten and now supports over 7,000 different coordinate systems, up from
+Since then, the project has been completely rewritten and now supports over <!-- CRS:START -->7,000<!-- CRS:END --> different coordinate systems, up from
 just 10 in previous versions.
 
 ## 📈[Behat Code Coverage](https://behat.cc) [![Download count](https://img.shields.io/packagist/dt/dvdoug/behat-code-coverage.svg)](https://packagist.org/packages/dvdoug/behat-code-coverage)

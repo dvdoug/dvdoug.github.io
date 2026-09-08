@@ -10,6 +10,9 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: master
+  # Also invoked after the stats bot commits (GITHUB_TOKEN pushes do not
+  # trigger other workflows on their own).
+  workflow_dispatch: ~
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
