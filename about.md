@@ -33,7 +33,7 @@ what national mapping authorities think it is then you need a conversion library
 first needed to do co-ordinate conversion, but was written for an old version of PHP. I polished it up, fixed some bugs
 and added some features.
 
-Since then, the project has been completely rewritten and now supports over <!-- CRS:START -->7,100<!-- CRS:END --> different coordinate systems, up from
+Since then, the project has been completely rewritten and now supports over <!-- CRS:START -->7,400<!-- CRS:END --> different coordinate systems, up from
 just 10 in previous versions.
 
 ## 📈[Behat Code Coverage](https://behat.cc) [![Download count](https://img.shields.io/packagist/dt/dvdoug/behat-code-coverage.svg)](https://packagist.org/packages/dvdoug/behat-code-coverage)
